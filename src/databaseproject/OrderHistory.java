@@ -1,0 +1,473 @@
+package databaseproject;
+
+import databaseproject.myDBCon;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
+
+//This class creates the GUI for logging in to the system, and implements all the needed
+//functions in order to veryify the user login is valid, giving the user access to the system
+
+
+public class OrderHistory extends javax.swing.JFrame {
+
+    LoginUser u;
+
+    myDBCon con = new myDBCon();
+
+    /**
+     * Creates new form LoginForm
+     */
+    public OrderHistory(LoginUser luser) {
+        initComponents();
+        this.setLocationRelativeTo(null);
+        
+        
+            
+        u = luser;
+        getNewData();
+    }
+    
+        private void getNewData() {
+            nameText.setText("");
+            priceText.setText("");
+            quantityText.setText("");
+            ISBNText.setText("");
+            timestampText.setText("");
+            quantityCost.setText("");
+            totalOrderCostText.setText("");
+            totalComicQuantityText.setText("");
+        try {
+            
+            con.rs = con.executeStatement("select bo.orderno, b.Name, bo.quantity, b.price, o.total, b.ISBN, timestamp from Comic b, Comic_Order bo, orders o where b.isbn = bo.isbn and o.orderno = bo.orderno and o.status=1 and o.username='" + u.username +"' order by o.timestamp asc");
+            con.rs.beforeFirst();
+            con.rs.first();
+            System.out.println("checkpoint");
+            populateFields();
+            
+            
+        } catch (SQLException e) {
+            javax.swing.JLabel label = new javax.swing.JLabel("SQL Error - Display selected username.\n" + e.getMessage());
+            label.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 18));
+            JOptionPane.showMessageDialog(null, label, "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void populateFields() {
+        try {
+            //populate fiels from ResultSet data
+            ordernoText.setText(con.rs.getString("Orderno"));
+            nameText.setText(con.rs.getString("Name"));
+            priceText.setText(con.rs.getString("price"));
+            quantityText.setText(con.rs.getString("quantity"));
+            ISBNText.setText(con.rs.getString("isbn"));
+            timestampText.setText(con.rs.getString("timestamp"));
+            totalOrderCostText.setText(con.rs.getString("total"));
+            double tempCost = Double.parseDouble(priceText.getText())*Double.parseDouble(quantityText.getText());
+            quantityCost.setText(""+tempCost);
+            EnableDisableButtons();
+            //agregate function and joins
+            con.rs2 = con.executeStatement2("select SUM(QUANTITY) from comic_order bo, orders o where bo.orderno=o.orderno and bo.orderno=" + ordernoText.getText());
+            con.rs2.first();
+            totalComicQuantityText.setText(con.rs2.getString("SUM(QUANTITY)"));
+            
+        } catch (SQLException ex) {
+            //Logger.getLogger(updateLogin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void MoveNext() {
+        try {
+            //if not the last row of the result set, move to next row
+            if (!con.rs.isLast()) {
+
+                con.rs.next();
+                populateFields();
+
+            }
+        } catch (SQLException ex) {
+            //Logger.getLogger(updateLogin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void MovePrevious() {
+        try {
+            //if not the first row of the result set, move to previous row
+            if (!con.rs.isFirst()) {
+                con.rs.previous();
+                populateFields();
+
+            }
+        } catch (SQLException ex) {
+            //Logger.getLogger(updateLogin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void EnableDisableButtons() {
+        try {
+            //if first row is displayed, disable the previous button. else, enable it
+            if (con.rs.isFirst()) {
+                btnPrevious.setEnabled(false);
+            } else {
+                btnPrevious.setEnabled(true);
+            }
+            //if last row is displayed, disable the next button. else, enable it
+            if (con.rs.isLast()) {
+                btnNext.setEnabled(false);
+            } else {
+                btnNext.setEnabled(true);
+            }
+        } catch (SQLException ex) {
+            //Logger.getLogger(updateLogin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jLabel1 = new javax.swing.JLabel();
+        nameText = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        HomeButton = new javax.swing.JButton();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        btnPrevious = new javax.swing.JButton();
+        btnNext = new javax.swing.JButton();
+        priceText = new javax.swing.JTextField();
+        quantityText = new javax.swing.JTextField();
+        ISBNText = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        quantityCost = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        timestampText = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        ordernoText = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        totalOrderCostText = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        totalComicQuantityText = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Online Bookstore Sign In Page");
+
+        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel1.setText("Name:");
+
+        nameText.setEditable(false);
+        nameText.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        nameText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nameTextActionPerformed(evt);
+            }
+        });
+
+        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        jLabel3.setText("Order History");
+
+        HomeButton.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        HomeButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/databaseproject/home.png"))); // NOI18N
+        HomeButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                HomeButtonActionPerformed(evt);
+            }
+        });
+
+        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel4.setText("Price:");
+
+        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel5.setText("Quantity:");
+
+        jLabel7.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel7.setText("ISBN:");
+
+        btnPrevious.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        btnPrevious.setText("<< Previous");
+        btnPrevious.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPreviousActionPerformed(evt);
+            }
+        });
+
+        btnNext.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        btnNext.setText("Next >>");
+        btnNext.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNextActionPerformed(evt);
+            }
+        });
+
+        priceText.setEditable(false);
+        priceText.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        priceText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                priceTextActionPerformed(evt);
+            }
+        });
+
+        quantityText.setEditable(false);
+        quantityText.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        quantityText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                quantityTextActionPerformed(evt);
+            }
+        });
+
+        ISBNText.setEditable(false);
+        ISBNText.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        ISBNText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ISBNTextActionPerformed(evt);
+            }
+        });
+
+        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel6.setText("Cost of Comics:");
+
+        quantityCost.setEditable(false);
+        quantityCost.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        quantityCost.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                quantityCostActionPerformed(evt);
+            }
+        });
+
+        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel8.setText("TimeStamp:");
+
+        timestampText.setEditable(false);
+        timestampText.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        timestampText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                timestampTextActionPerformed(evt);
+            }
+        });
+
+        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel2.setText("OrderNo:");
+
+        ordernoText.setEditable(false);
+        ordernoText.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        ordernoText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ordernoTextActionPerformed(evt);
+            }
+        });
+
+        jLabel9.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel9.setText("Total Order Cost:");
+
+        totalOrderCostText.setEditable(false);
+        totalOrderCostText.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        totalOrderCostText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                totalOrderCostTextActionPerformed(evt);
+            }
+        });
+
+        jLabel10.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel10.setText("Total # of Comics:");
+
+        totalComicQuantityText.setEditable(false);
+        totalComicQuantityText.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        totalComicQuantityText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                totalComicQuantityTextActionPerformed(evt);
+            }
+        });
+
+        jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/databaseproject/pics/icons8-pow-50.png"))); // NOI18N
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(150, 150, 150)
+                        .addComponent(btnPrevious)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnNext)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(HomeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(34, 34, 34)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(ordernoText, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(totalComicQuantityText, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(totalOrderCostText, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(nameText, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(priceText, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(quantityText, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(quantityCost, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(ISBNText, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(timestampText, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(51, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jLabel3)
+                .addGap(167, 167, 167)
+                .addComponent(jLabel11))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(15, 15, 15)
+                        .addComponent(jLabel3))
+                    .addComponent(jLabel11))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(ordernoText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(nameText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(totalOrderCostText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(totalComicQuantityText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(34, 34, 34)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(quantityText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel6)
+                            .addComponent(quantityCost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(priceText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel4)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ISBNText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(timestampText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8))
+                .addGap(45, 45, 45)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(HomeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnPrevious)
+                        .addComponent(btnNext)))
+                .addGap(61, 61, 61))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void HomeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_HomeButtonActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+    }//GEN-LAST:event_HomeButtonActionPerformed
+
+    private void nameTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_nameTextActionPerformed
+
+    private void btnPreviousActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPreviousActionPerformed
+        // TODO add your handling code here:
+        MovePrevious();
+    }//GEN-LAST:event_btnPreviousActionPerformed
+
+    private void btnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextActionPerformed
+        // TODO add your handling code here:
+        MoveNext();
+    }//GEN-LAST:event_btnNextActionPerformed
+
+    private void priceTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_priceTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_priceTextActionPerformed
+
+    private void quantityTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quantityTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_quantityTextActionPerformed
+
+    private void ISBNTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ISBNTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ISBNTextActionPerformed
+
+    private void quantityCostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quantityCostActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_quantityCostActionPerformed
+
+    private void timestampTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timestampTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_timestampTextActionPerformed
+
+    private void ordernoTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ordernoTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ordernoTextActionPerformed
+
+    private void totalOrderCostTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_totalOrderCostTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_totalOrderCostTextActionPerformed
+
+    private void totalComicQuantityTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_totalComicQuantityTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_totalComicQuantityTextActionPerformed
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton HomeButton;
+    private javax.swing.JTextField ISBNText;
+    private javax.swing.JButton btnNext;
+    private javax.swing.JButton btnPrevious;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JTextField nameText;
+    private javax.swing.JTextField ordernoText;
+    private javax.swing.JTextField priceText;
+    private javax.swing.JTextField quantityCost;
+    private javax.swing.JTextField quantityText;
+    private javax.swing.JTextField timestampText;
+    private javax.swing.JTextField totalComicQuantityText;
+    private javax.swing.JTextField totalOrderCostText;
+    // End of variables declaration//GEN-END:variables
+}
